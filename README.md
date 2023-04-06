@@ -1,0 +1,1 @@
+madlibs but funny
