@@ -1,6 +1,11 @@
 madlibs but funny - twang
 ---
 
+## Group Members
+- [Jacob Gerega](https://github.com/jgerega107)
+- [Mitchell Reiff](https://github.com/MAPReiff)
+- [Thomas Wang](https://github.com/twang1905)
+
 # AI-Powered Mad Libs
 Mad Libs are a popular word game created in the 1950s.  To play the game, an author writes a short story consisting of a few sentences
 and then replaces some key words in the story with blanks labeled with a part of speech (noun, verb, adjective, etc.).  Then, players 
