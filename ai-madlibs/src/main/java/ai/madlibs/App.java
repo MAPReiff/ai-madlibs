@@ -1,17 +1,11 @@
 package ai.madlibs;
 
-import com.theokanning.openai.completion.CompletionRequest;
-import com.theokanning.openai.completion.chat.ChatCompletionRequest;
-import com.theokanning.openai.completion.chat.ChatMessage;
-import com.theokanning.openai.completion.chat.ChatMessageRole;
-import com.theokanning.openai.image.CreateImageRequest;
-import com.theokanning.openai.service.OpenAiService;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Properties;
+
+import com.lilittlecat.chatgpt.offical.ChatGPT;
 
 /**
  * Hello world!
@@ -34,30 +28,8 @@ public class App {
     }
     final String apiKey = props.getProperty("openAIkey");
 
-    // create a new instance of the OpenAI class
-    // OpenAiService service = new OpenAiService(apiKey);
-    // CompletionRequest completionRequest =
-    //     CompletionRequest.builder()
-    //         .prompt("Somebody once told me the world is gonna roll me")
-    //         .model("ada")
-    //         .echo(true)
-    //         .build();
-    // service.createCompletion(completionRequest)
-    //     .getChoices()
-    //     .forEach(System.out::println);
-
-    OpenAiService service = new OpenAiService(apiKey);
-    System.out.println("\nCreating completion...");
-    CompletionRequest completionRequest =
-        CompletionRequest.builder()
-            .model("ada")
-            .prompt("Somebody once told me the world is gonna roll me")
-            .echo(true)
-            .user("testing")
-            .n(3)
-            .build();
-    System.out.println(
-        service.createCompletion(completionRequest).getChoices());
-    // .forEach(System.out::println);
+    ChatGPT chatGPT = new ChatGPT(apiKey);
+    String hello = chatGPT.ask("Create a fill in the blanks madlibs with type of speech from this: After flying a long distance, a thirsty crow was wandering the forest in search of water. Finally, he saw a pot half-filled with water. He tried to drink from it but his beak wasn’t long enough to reach the water inside. He then saw pebbles on the ground and one by one, he put them in the pot until the water rose to the brim. The crow then hastily drank from it and quenched his thirst.");
+      System.out.println(hello); // will be "\n\nHello! How may I assist you today?"
   }
 }
