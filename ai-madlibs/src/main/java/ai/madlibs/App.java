@@ -4,6 +4,7 @@ package ai.madlibs;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.Scanner;
 
 import com.lilittlecat.chatgpt.offical.ChatGPT;
 
@@ -29,7 +30,32 @@ public class App {
     final String apiKey = props.getProperty("openAIkey");
 
     ChatGPT chatGPT = new ChatGPT(apiKey);
-    String hello = chatGPT.ask("Create a fill in the blanks madlibs with type of speech from this: After flying a long distance, a thirsty crow was wandering the forest in search of water. Finally, he saw a pot half-filled with water. He tried to drink from it but his beak wasn’t long enough to reach the water inside. He then saw pebbles on the ground and one by one, he put them in the pot until the water rose to the brim. The crow then hastily drank from it and quenched his thirst.");
-      System.out.println(hello); // will be "\n\nHello! How may I assist you today?"
+    Scanner scanner = new Scanner(System.in);
+
+    System.out.println("Enter a sentence for the AI to complete: ");
+    String input = scanner.nextLine();
+
+    String prompt = chatGPT.ask("Create a fill in the blanks madlibs with type of speech from this: " + input);
+    System.out.println(prompt); // will be "\n\nHello! How may I assist you today?"
+
+    String array[] = prompt.split(" ");
+    for(int i = 0; i < array.length; i++){
+      if (array[i].contains("(") && array[i].contains(")"))
+      {
+        System.out.println("Enter a word to replace: " + array[i]);
+        array[i] = scanner.nextLine();
+      }
+
+      System.out.println(array[i]);
+    }
+
+    System.out.println("Your madlib is: ");
+    String madlib = "";
+    for(int i = 0; i < array.length; i++){
+      madlib += array[i] + " ";
+    }
+    
+      System.out.println(madlib);
+
   }
 }
