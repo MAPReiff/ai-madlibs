@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
+import java.util.Arrays;
 // import java.util.Arrays;
 // import java.util.Properties;
 import java.util.Random;
@@ -99,10 +100,49 @@ public class App {
           int random = chance.nextInt(10);
 
           if (random <= 3) {
-            System.out.println("\n\nEnter a word to replace: " + array[i]);
+            String partOfSpeech =
+                array[i].substring(array[i].lastIndexOf("_") + 1);
+            if (partOfSpeech.equals("NOUN")) {
+              partOfSpeech = "noun";
+            } else if (partOfSpeech.equals("VERB")) {
+              partOfSpeech = "verb";
+            } else if (partOfSpeech.equals("ADJ")) {
+              partOfSpeech = "adjective";
+            }
 
-            array[i] = scanner.nextLine();
-            System.out.println();
+            System.out.println("\n\nEnter a " + partOfSpeech +
+                               " to replace: " + array[i].split("_")[0]);
+            boolean correct = false;
+            while (correct == false) {
+              String currentInput = scanner.nextLine().trim();
+              String[] token = whitespaceTokenizer.tokenize(currentInput);
+              String[] tag = tagger.tag(token);
+              POSSample currentSample = new POSSample(token, tag);
+              String[] currentArray = currentSample.toString().split(" ");
+
+              if (array[i]
+                      .substring(array[i].lastIndexOf("_") + 1)
+                      .equals(currentArray[0].substring(
+                          currentArray[0].lastIndexOf("_") + 1))) {
+                correct = true;
+              } else {
+
+                String currentPartOfSpeech = currentArray[0].substring(
+                    currentArray[0].lastIndexOf("_") + 1);
+
+                if (currentPartOfSpeech.equals("NOUN")) {
+                  currentPartOfSpeech = "noun";
+                } else if (currentPartOfSpeech.equals("VERB")) {
+                  currentPartOfSpeech = "verb";
+                } else if (currentPartOfSpeech.equals("ADJ")) {
+                  currentPartOfSpeech = "adjective";
+                }
+
+                System.out.println("You have entered a " + currentPartOfSpeech +
+                                   ", please try again and enter a " +
+                                   partOfSpeech + ".");
+              }
+            }
           } else {
             array[i] = array[i].substring(0, array[i].indexOf("_"));
             System.out.print(array[i] + " ");
