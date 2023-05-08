@@ -5,9 +5,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
-import java.util.Properties;
+// import java.util.Arrays;
+// import java.util.Properties;
+import java.util.Random;
 import java.util.Scanner;
-import com.lilittlecat.chatgpt.offical.ChatGPT;
+// import com.lilittlecat.chatgpt.offical.ChatGPT;
+import opennlp.tools.postag.POSModel;
+import opennlp.tools.postag.POSSample;
+import opennlp.tools.postag.POSTaggerME;
+import opennlp.tools.tokenize.WhitespaceTokenizer;
 
 public class App {
 
@@ -30,7 +36,8 @@ public class App {
           System.out.println();
           System.out.println(existingMadlib.toString());
         } catch (IOException e) {
-          System.out.println("Error has occured. File likely does not exist. Exiting...");
+          System.out.println(
+              "Error has occured. File likely does not exist. Exiting...");
           scanner.close();
           return;
         }
@@ -42,31 +49,67 @@ public class App {
       System.exit(0);
     } else {
       // read in API key for OpenAI from properties file
-      Properties props = new Properties();
-      InputStream inputStream = App.class.getClassLoader().getResourceAsStream("api.properties");
+      // Properties props = new Properties();
+      // InputStream inputStream =
+      // App.class.getClassLoader().getResourceAsStream("api.properties");
 
-      if (inputStream != null) {
-        props.load(inputStream);
-      }
-      final String apiKey = props.getProperty("openAIkey");
+      // opennlp to check if user input matches part of speech
+      InputStream inputStreamNLP =
+          App.class.getClassLoader().getResourceAsStream(
+              "opennlp-en-ud-ewt-pos-1.0-1.9.3.bin");
+      POSModel model = new POSModel(inputStreamNLP);
+      POSTaggerME tagger = new POSTaggerME(model);
+      WhitespaceTokenizer whitespaceTokenizer = WhitespaceTokenizer.INSTANCE;
 
-      ChatGPT chatGPT = new ChatGPT(apiKey);
+      // if (inputStream != null) {
+      //   props.load(inputStream);
+      // }
+      // final String apiKey = props.getProperty("openAIkey");
 
-      System.out.println("Enter a sentence for the AI to complete: ");
+      // ChatGPT chatGPT = new ChatGPT(apiKey);
+
+      System.out.println(
+          "Enter a sentence for the AI to turn into a madlibs: ");
       String input = scanner.nextLine();
 
-      String prompt = chatGPT.ask(
-          "Welcome to the Madlibs AI! Please enter a sentence. I will transform it into a funny madlibs game by replacing random nouns, verbs, and adjectives with blank spaces surrounded by parentheses. Let's get started!\nExample input: The quick brown fox jumped over the lazy dog.\nExample output: The (adjective) (adjective) (noun) (verb) over the (adjective) (noun).\n\n"
-              + input);
+      // String prompt = chatGPT.ask(
+      //     "Welcome to the Madlibs AI! Please enter a sentence. I will
+      //     transform it into a funny madlibs game by replacing random nouns,
+      //     verbs, and adjectives with blank spaces surrounded by parentheses.
+      //     Let's get started!\nExample input: The quick brown fox jumped over
+      //     the lazy dog.\nExample output: The (adjective) (adjective) (noun)
+      //     (verb) over the (adjective) (noun).\n\n"
+      //         + input);
+
+      String[] tokens = whitespaceTokenizer.tokenize(input);
+      String[] tags = tagger.tag(tokens);
+      POSSample sample = new POSSample(tokens, tags);
+
       System.out.println("\n--------------------------------------\n");
 
-      String array[] = prompt.split(" ");
+      String array[] = sample.toString().split(" ");
+
+      // System.out.print(Arrays.toString(array));
+      // System.exit(0);
       for (int i = 0; i < array.length; i++) {
-        if (array[i].contains("(") && array[i].contains(")")) {
-          System.out.println("\n\nEnter a word to replace: " + array[i]);
-          array[i] = scanner.nextLine();
-          System.out.println();
+        Random chance = new Random();
+
+        if (array[i].contains("_NOUN") || array[i].contains("_VERB") ||
+            array[i].contains("_ADJ")) {
+          int random = chance.nextInt(10);
+
+          if (random <= 3) {
+            System.out.println("\n\nEnter a word to replace: " + array[i]);
+
+            array[i] = scanner.nextLine();
+            System.out.println();
+          } else {
+            array[i] = array[i].substring(0, array[i].indexOf("_"));
+            System.out.print(array[i] + " ");
+          }
+
         } else {
+          array[i] = array[i].substring(0, array[i].indexOf("_"));
           System.out.print(array[i] + " ");
         }
       }
