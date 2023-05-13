@@ -50,6 +50,11 @@ public class App {
   String newMadLib(Scanner scanner) throws IOException {
     System.out.println("Enter a sentence for the AI to turn into a madlibs: ");
     String input = scanner.nextLine().trim();
+    while (input.isEmpty()) {
+      System.out.println("Sentence cannot be empty. Please try again.");
+      System.out.println("Enter a sentence for the AI to turn into a madlibs: ");
+      input = scanner.nextLine().trim();
+    }
     return generateMadLib(scanner, input);
   }
 
@@ -106,84 +111,76 @@ public class App {
 
     // System.out.print(Arrays.toString(array));
     // System.exit(0);
-    Random chance = new Random(); // random number generator
     int x = -1;
 
     for (String value : array) {
       x++;
       if (value.contains("_NOUN") || value.contains("_VERB") ||
           value.contains("_ADJ")) {
-        int random = chance.nextInt(10); // random number between 0 and 9
 
-        if (random <= 2) { // 30% chance of replacing the word
+        String partOfSpeech = value.substring(value.lastIndexOf("_") +
+            1); // get the part of speech
+        // get string for POS
+        switch (partOfSpeech) {
+          case "NOUN":
+            partOfSpeech = "noun";
+            break;
+          case "VERB":
+            partOfSpeech = "verb";
+            break;
+          case "ADJ":
+            partOfSpeech = "adjective";
+            break;
+          default:
+            partOfSpeech = "noun"; // default to noun in case of somehow not
+                                   // being one of the above
+            break;
+        }
 
-          String partOfSpeech = value.substring(value.lastIndexOf("_") +
-              1); // get the part of speech
-          // get string for POS
-          switch (partOfSpeech) {
-            case "NOUN":
-              partOfSpeech = "noun";
-              break;
-            case "VERB":
-              partOfSpeech = "verb";
-              break;
-            case "ADJ":
-              partOfSpeech = "adjective";
-              break;
-            default:
-              partOfSpeech = "noun"; // default to noun in case of somehow not
-                                     // being one of the above
-              break;
-          }
+        System.out.println("\n\nEnter a " + partOfSpeech + ": ");
+        // " to replace: " + value.split("_")[0]);
+        boolean correct = false;
+        String POS = value.substring(value.lastIndexOf("_") + 1);
+        while (!correct) { // loop until the user enters a valid input
+          // same deal as previous NLP stuff
+          String currentInput = scanner.nextLine().trim();
 
-          System.out.println("\n\nEnter a " + partOfSpeech + ": ");
-          // " to replace: " + value.split("_")[0]);
-          boolean correct = false;
-          String POS = value.substring(value.lastIndexOf("_") + 1);
-          while (!correct) { // loop until the user enters a valid input
-            // same deal as previous NLP stuff
-            String currentInput = scanner.nextLine().trim();
+          POSSample currentSample = new POSSample(
+              whitespaceTokenizer.tokenize(currentInput),
+              tagger.tag(whitespaceTokenizer.tokenize(currentInput)));
 
-            POSSample currentSample = new POSSample(
-                whitespaceTokenizer.tokenize(currentInput),
-                tagger.tag(whitespaceTokenizer.tokenize(currentInput)));
+          String[] currentArray = currentSample.toString().split(" ");
 
-            String[] currentArray = currentSample.toString().split(" ");
+          if (POS.equals(
+              currentArray[0].substring(currentArray[0].lastIndexOf("_") +
+                  1))) { // check if the POS matches
+            correct = true;
+            array[x] = currentInput;
+          } else { // if not, tell the user what they entered and what they
+                   // should have entered
+            String currentPartOfSpeech = currentArray[0].substring(
+                currentArray[0].lastIndexOf("_") + 1);
 
-            if (POS.equals(
-                currentArray[0].substring(currentArray[0].lastIndexOf("_") +
-                    1))) { // check if the POS matches
-              correct = true;
-              array[x] = currentInput;
-            } else { // if not, tell the user what they entered and what they
-                     // should have entered
-              String currentPartOfSpeech = currentArray[0].substring(
-                  currentArray[0].lastIndexOf("_") + 1);
-
-              switch (currentPartOfSpeech) {
-                case "NOUN":
-                  currentPartOfSpeech = "noun";
-                  break;
-                case "VERB":
-                  currentPartOfSpeech = "verb";
-                  break;
-                case "ADJ":
-                  currentPartOfSpeech = "adjective";
-                  break;
-                default:
-                  currentPartOfSpeech = "noun"; // default to noun in case of somehow
-                                                // not being one of the above
-                  break;
-              }
-
-              System.out.println("You have entered a " + currentPartOfSpeech +
-                  ", please try again and enter a " +
-                  partOfSpeech + ".");
+            switch (currentPartOfSpeech) {
+              case "NOUN":
+                currentPartOfSpeech = "noun";
+                break;
+              case "VERB":
+                currentPartOfSpeech = "verb";
+                break;
+              case "ADJ":
+                currentPartOfSpeech = "adjective";
+                break;
+              default:
+                currentPartOfSpeech = "noun"; // default to noun in case of somehow
+                                              // not being one of the above
+                break;
             }
+
+            System.out.println("You have entered a " + currentPartOfSpeech +
+                ", please try again and enter a " +
+                partOfSpeech + ".");
           }
-        } else {
-          array[x] = value.substring(0, value.indexOf("_"));
-          System.out.print(array[x] + " ");
         }
 
       } else {
