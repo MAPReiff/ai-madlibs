@@ -6,11 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
 import java.util.Arrays;
-// import java.util.Arrays;
-// import java.util.Properties;
 import java.util.Random;
 import java.util.Scanner;
-// import com.lilittlecat.chatgpt.offical.ChatGPT;
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSSample;
 import opennlp.tools.postag.POSTaggerME;
@@ -52,7 +49,8 @@ public class App {
     String input = scanner.nextLine().trim();
     while (input.isEmpty()) {
       System.out.println("Sentence cannot be empty. Please try again.");
-      System.out.println("Enter a sentence for the AI to turn into a madlibs: ");
+      System.out.println(
+          "Enter a sentence for the AI to turn into a madlibs: ");
       input = scanner.nextLine().trim();
     }
     return generateMadLib(scanner, input);
@@ -80,37 +78,21 @@ public class App {
   String generateMadLib(Scanner scanner, String input) throws IOException {
     // opennlp to tag POS for input
     InputStream inputStreamNLP = App.class.getClassLoader().getResourceAsStream(
-        "opennlp-en-ud-ewt-pos-1.0-1.9.3.bin"); // loads the model file
+        "opennlp-en-ud-ewt-pos-1.0-1.9.3.bin");    // loads the model file
     POSModel model = new POSModel(inputStreamNLP); // init the model
-    POSTaggerME tagger = new POSTaggerME(model); // init the tagger
-    WhitespaceTokenizer whitespaceTokenizer = WhitespaceTokenizer.INSTANCE; // init the tokenizer
-
-    // if (inputStream != null) {
-    // props.load(inputStream);
-    // }
-    // final String apiKey = props.getProperty("openAIkey");
-
-    // ChatGPT chatGPT = new ChatGPT(apiKey);
-
-    // String prompt = chatGPT.ask(
-    // "Welcome to the Madlibs AI! Please enter a sentence. I will
-    // transform it into a funny madlibs game by replacing random nouns,
-    // verbs, and adjectives with blank spaces surrounded by parentheses.
-    // Let's get started!\nExample input: The quick brown fox jumped over
-    // the lazy dog.\nExample output: The (adjective) (adjective) (noun)
-    // (verb) over the (adjective) (noun).\n\n"
-    // + input);
+    POSTaggerME tagger = new POSTaggerME(model);   // init the tagger
+    WhitespaceTokenizer whitespaceTokenizer =
+        WhitespaceTokenizer.INSTANCE; // init the tokenizer
 
     String[] tokens = whitespaceTokenizer.tokenize(input); // tokenize the input
-    String[] tags = tagger.tag(tokens); // tag the tokens
-    POSSample sample = new POSSample(tokens, tags); // init the sample
+    String[] tags = tagger.tag(tokens);                    // tag the tokens
+    POSSample sample = new POSSample(tokens, tags);        // init the sample
 
     System.out.println("\n--------------------------------------\n");
 
-    String[] array = sample.toString().split(" "); // split the sample into an array
+    String[] array =
+        sample.toString().split(" "); // split the sample into an array
 
-    // System.out.print(Arrays.toString(array));
-    // System.exit(0);
     int x = -1;
 
     for (String value : array) {
@@ -119,22 +101,22 @@ public class App {
           value.contains("_ADJ")) {
 
         String partOfSpeech = value.substring(value.lastIndexOf("_") +
-            1); // get the part of speech
+                                              1); // get the part of speech
         // get string for POS
         switch (partOfSpeech) {
-          case "NOUN":
-            partOfSpeech = "noun";
-            break;
-          case "VERB":
-            partOfSpeech = "verb";
-            break;
-          case "ADJ":
-            partOfSpeech = "adjective";
-            break;
-          default:
-            partOfSpeech = "noun"; // default to noun in case of somehow not
-                                   // being one of the above
-            break;
+        case "NOUN":
+          partOfSpeech = "noun";
+          break;
+        case "VERB":
+          partOfSpeech = "verb";
+          break;
+        case "ADJ":
+          partOfSpeech = "adjective";
+          break;
+        default:
+          partOfSpeech = "noun"; // default to noun in case of somehow not
+                                 // being one of the above
+          break;
         }
 
         System.out.println("\n\nEnter a " + partOfSpeech + ": ");
@@ -152,34 +134,35 @@ public class App {
           String[] currentArray = currentSample.toString().split(" ");
 
           if (POS.equals(
-              currentArray[0].substring(currentArray[0].lastIndexOf("_") +
-                  1))) { // check if the POS matches
+                  currentArray[0].substring(currentArray[0].lastIndexOf("_") +
+                                            1))) { // check if the POS matches
             correct = true;
             array[x] = currentInput;
           } else { // if not, tell the user what they entered and what they
                    // should have entered
-            String currentPartOfSpeech = currentArray[0].substring(
-                currentArray[0].lastIndexOf("_") + 1);
+            String currentPartOfSpeech =
+                currentArray[0].substring(currentArray[0].lastIndexOf("_") + 1);
 
             switch (currentPartOfSpeech) {
-              case "NOUN":
-                currentPartOfSpeech = "noun";
-                break;
-              case "VERB":
-                currentPartOfSpeech = "verb";
-                break;
-              case "ADJ":
-                currentPartOfSpeech = "adjective";
-                break;
-              default:
-                currentPartOfSpeech = "noun"; // default to noun in case of somehow
-                                              // not being one of the above
-                break;
+            case "NOUN":
+              currentPartOfSpeech = "noun";
+              break;
+            case "VERB":
+              currentPartOfSpeech = "verb";
+              break;
+            case "ADJ":
+              currentPartOfSpeech = "adjective";
+              break;
+            default:
+              currentPartOfSpeech =
+                  "noun"; // default to noun in case of somehow
+                          // not being one of the above
+              break;
             }
 
             System.out.println("You have entered a " + currentPartOfSpeech +
-                ", please try again and enter a " +
-                partOfSpeech + ".");
+                               ", please try again and enter a " +
+                               partOfSpeech + ".");
           }
         }
 
