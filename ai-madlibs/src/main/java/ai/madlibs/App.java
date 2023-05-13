@@ -21,34 +21,30 @@ public class App {
   public static void main(String[] args) throws IOException {
     Scanner scanner = new Scanner(System.in);
     System.out.println(
-        "Welcome to Madlibs AI! Would you like to read in a completed madlib or generate a new one? (Press 1 for existing, or any other key for new)");
-    if (scanner.nextLine().trim().equals("1")) {
+        "Welcome to Madlibs AI! Would you like to read in a completed madlib or generate a new one? (Press 1 for existing, or 2 for new)");
+    String choice = scanner.nextLine().trim();
+    if (choice.equals("1")) {
       System.out.println("What's the file name of the existing madlib?");
       String readName = scanner.nextLine();
       if (!readName.isEmpty()) {
-        StringBuilder existingMadlib = new StringBuilder();
-        try {
-          File targetFile = new File(readName);
-          Scanner readFile = new Scanner(targetFile);
+        try (Scanner readFile = new Scanner(new File(readName))) {
           while (readFile.hasNextLine()) {
-            existingMadlib.append(readFile.nextLine());
+            System.out.println(readFile.nextLine());
           }
-          readFile.close();
-          System.out.println();
-          System.out.println(existingMadlib.toString());
         } catch (IOException e) {
           System.out.println(
-              "Error has occured. File likely does not exist. Exiting...");
+              "Error has occurred. File likely does not exist. Exiting...");
           scanner.close();
           return;
         }
       } else {
         System.out.println("Invalid file name. Exiting...");
         scanner.close();
-        return;
+        System.exit(1);
       }
+
       System.exit(0);
-    } else {
+    } else if (choice.equals("2")) {
       // read in API key for OpenAI from properties file
       // Properties props = new Properties();
       // InputStream inputStream =
@@ -95,56 +91,73 @@ public class App {
 
       // System.out.print(Arrays.toString(array));
       // System.exit(0);
-      for (int i = 0; i < array.length; i++) {
-        Random chance = new Random(); // random number generator
-
-        if (array[i].contains("_NOUN") || array[i].contains("_VERB") ||
-            array[i].contains("_ADJ")) {
+      Random chance = new Random(); // random number generator
+      int x = -1;
+      for (String value : array) {
+        x++;
+        if (value.contains("_NOUN") || value.contains("_VERB") ||
+            value.contains("_ADJ")) {
           int random = chance.nextInt(10); // random number between 0 and 9
 
           if (random <= 2) { // 30% chance of replacing the word
 
-            String partOfSpeech = array[i].substring(
-                array[i].lastIndexOf("_") + 1); // get the part of speech
+            String partOfSpeech = value.substring(value.lastIndexOf("_") +
+                                                  1); // get the part of speech
             // get string for POS
-            if (partOfSpeech.equals("NOUN")) {
+            switch (partOfSpeech) {
+            case "NOUN":
               partOfSpeech = "noun";
-
-            } else if (partOfSpeech.equals("VERB")) {
+              break;
+            case "VERB":
               partOfSpeech = "verb";
-            } else if (partOfSpeech.equals("ADJ")) {
+              break;
+            case "ADJ":
               partOfSpeech = "adjective";
+              break;
+            default:
+              partOfSpeech = "noun"; // default to noun in case of somehow not
+                                     // being one of the above
+              break;
             }
 
-            System.out.println("\n\nEnter a " + partOfSpeech +
-                               " to replace: " + array[i].split("_")[0]);
+            System.out.println("\n\nEnter a " + partOfSpeech + ": ");
+            //  " to replace: " + value.split("_")[0]);
             boolean correct = false;
+            String POS = value.substring(value.lastIndexOf("_") + 1);
             while (!correct) { // loop until the user enters a valid input
               // same deal as previous NLP stuff
               String currentInput = scanner.nextLine().trim();
-              String[] token = whitespaceTokenizer.tokenize(currentInput);
-              String[] tag = tagger.tag(token);
-              POSSample currentSample = new POSSample(token, tag);
+
+              POSSample currentSample = new POSSample(
+                  whitespaceTokenizer.tokenize(currentInput),
+                  tagger.tag(whitespaceTokenizer.tokenize(currentInput)));
+
               String[] currentArray = currentSample.toString().split(" ");
 
-              if (array[i]
-                      .substring(array[i].lastIndexOf("_") + 1)
-                      .equals(currentArray[0].substring(
-                          currentArray[0].lastIndexOf("_") +
-                          1))) { // check if the POS matches
+              if (POS.equals(currentArray[0].substring(
+                      currentArray[0].lastIndexOf("_") +
+                      1))) { // check if the POS matches
                 correct = true;
-                array[i] = currentInput;
+                array[x] = currentInput;
               } else { // if not, tell the user what they entered and what they
                        // should have entered
                 String currentPartOfSpeech = currentArray[0].substring(
                     currentArray[0].lastIndexOf("_") + 1);
 
-                if (currentPartOfSpeech.equals("NOUN")) {
-                  currentPartOfSpeech = "noun";
-                } else if (currentPartOfSpeech.equals("VERB")) {
-                  currentPartOfSpeech = "verb";
-                } else if (currentPartOfSpeech.equals("ADJ")) {
-                  currentPartOfSpeech = "adjective";
+                switch (partOfSpeech) {
+                case "NOUN":
+                  partOfSpeech = "noun";
+                  break;
+                case "VERB":
+                  partOfSpeech = "verb";
+                  break;
+                case "ADJ":
+                  partOfSpeech = "adjective";
+                  break;
+                default:
+                  partOfSpeech = "noun"; // default to noun in case of somehow
+                                         // not being one of the above
+                  break;
                 }
 
                 System.out.println("You have entered a " + currentPartOfSpeech +
@@ -153,13 +166,13 @@ public class App {
               }
             }
           } else {
-            array[i] = array[i].substring(0, array[i].indexOf("_"));
-            System.out.print(array[i] + " ");
+            array[x] = value.substring(0, value.indexOf("_"));
+            System.out.print(array[x] + " ");
           }
 
         } else {
-          array[i] = array[i].substring(0, array[i].indexOf("_"));
-          System.out.print(array[i] + " ");
+          array[x] = value.substring(0, value.indexOf("_"));
+          System.out.print(array[x] + " ");
         }
       }
       System.out.println("\n");
@@ -180,15 +193,22 @@ public class App {
         String filename = scanner.nextLine().trim();
         if (!filename.isEmpty()) {
           File target = new File(filename);
-          target.createNewFile();
-          Writer targetFileWriter = new FileWriter(target);
-          targetFileWriter.write(madlib);
-          targetFileWriter.close();
+          if (target.createNewFile()) {
+            Writer targetFileWriter = new FileWriter(target);
+            targetFileWriter.write(madlib);
+            targetFileWriter.close();
+          } else {
+            System.err.println("File already exists. Exiting....");
+          }
+
         } else {
           System.out.println("Invalid file name. Exiting....");
         }
       }
       scanner.close();
+      System.exit(0);
+    } else {
+      System.out.println("Invalid input. Exiting....");
       System.exit(0);
     }
   }
