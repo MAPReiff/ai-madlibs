@@ -54,13 +54,13 @@ public class App {
       // InputStream inputStream =
       // App.class.getClassLoader().getResourceAsStream("api.properties");
 
-      // opennlp to check if user input matches part of speech
+      // opennlp to tag POS for input
       InputStream inputStreamNLP =
           App.class.getClassLoader().getResourceAsStream(
-              "opennlp-en-ud-ewt-pos-1.0-1.9.3.bin");
-      POSModel model = new POSModel(inputStreamNLP);
-      POSTaggerME tagger = new POSTaggerME(model);
-      WhitespaceTokenizer whitespaceTokenizer = WhitespaceTokenizer.INSTANCE;
+              "opennlp-en-ud-ewt-pos-1.0-1.9.3.bin"); // loads the model file
+      POSModel model = new POSModel(inputStreamNLP); // init the model
+      POSTaggerME tagger = new POSTaggerME(model);  // init the tagger
+      WhitespaceTokenizer whitespaceTokenizer = WhitespaceTokenizer.INSTANCE; // init the tokenizer
 
       // if (inputStream != null) {
       //   props.load(inputStream);
@@ -82,26 +82,27 @@ public class App {
       //     (verb) over the (adjective) (noun).\n\n"
       //         + input);
 
-      String[] tokens = whitespaceTokenizer.tokenize(input);
-      String[] tags = tagger.tag(tokens);
-      POSSample sample = new POSSample(tokens, tags);
+      String[] tokens = whitespaceTokenizer.tokenize(input); // tokenize the input
+      String[] tags = tagger.tag(tokens); // tag the tokens
+      POSSample sample = new POSSample(tokens, tags); // init the sample
 
       System.out.println("\n--------------------------------------\n");
 
-      String array[] = sample.toString().split(" ");
+      String[] array = sample.toString().split(" "); // split the sample into an array
 
       // System.out.print(Arrays.toString(array));
       // System.exit(0);
       for (int i = 0; i < array.length; i++) {
-        Random chance = new Random();
+        Random chance = new Random(); // random number generator
 
         if (array[i].contains("_NOUN") || array[i].contains("_VERB") ||
             array[i].contains("_ADJ")) {
-          int random = chance.nextInt(10);
+          int random = chance.nextInt(10); // random number between 0 and 9
 
-          if (random <= 3) {
+          if (random <= 2) { // 30% chance of replacing the word
             String partOfSpeech =
-                array[i].substring(array[i].lastIndexOf("_") + 1);
+                array[i].substring(array[i].lastIndexOf("_") + 1); // get the part of speech
+            // get string for POS
             if (partOfSpeech.equals("NOUN")) {
               partOfSpeech = "noun";
             } else if (partOfSpeech.equals("VERB")) {
@@ -113,7 +114,8 @@ public class App {
             System.out.println("\n\nEnter a " + partOfSpeech +
                                " to replace: " + array[i].split("_")[0]);
             boolean correct = false;
-            while (correct == false) {
+            while (correct == false) { // loop until the user enters a valid input
+              // same deal as previous NLP stuff
               String currentInput = scanner.nextLine().trim();
               String[] token = whitespaceTokenizer.tokenize(currentInput);
               String[] tag = tagger.tag(token);
@@ -123,10 +125,9 @@ public class App {
               if (array[i]
                       .substring(array[i].lastIndexOf("_") + 1)
                       .equals(currentArray[0].substring(
-                          currentArray[0].lastIndexOf("_") + 1))) {
+                          currentArray[0].lastIndexOf("_") + 1))) { // check if the POS matches
                 correct = true;
-              } else {
-
+              } else { // if not, tell the user what they entered and what they should have entered
                 String currentPartOfSpeech = currentArray[0].substring(
                     currentArray[0].lastIndexOf("_") + 1);
 
